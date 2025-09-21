@@ -22,9 +22,22 @@ import localSearch.tabuSearch as tabusearch
 import localSearch.beamSearch as beamsearch
 
 
+#stochastic search
+import Stochastic.randomWalk as randomwalk
+import Stochastic.simulatedAnnealing as simulatedannealing
+import Stochastic.hillClimbing as stochastichillclimbing
+
+
+#Genetic Algorithm
+import Genetic.tsp as ga_tsp
+
+# ACO
+import ACO.aco as aco
+
 
 
 '''
+
 graph = [
     [0,   29,  20,  21,  16,  31, 100,  12],
     [29,   0,  15,  29,  28,  40,  72,  21],
@@ -37,6 +50,8 @@ graph = [
 ]
 
 '''
+
+# best found 2639
 graph = [
     [0, 110, 221, 950, 385, 40, 257, 951, 19, 958, 705, 343, 195, 659, 843, 702, 449, 757, 98, 509, 754, 670, 753, 309, 164, 752, 732, 751, 338, 976, 221, 654, 929, 444, 734, 699, 84, 441, 240, 696, 378, 151, 607, 722, 424, 574, 876, 276, 846, 42],
     [110, 0, 621, 714, 726, 173, 19, 581, 650, 683, 672, 515, 437, 468, 422, 627, 820, 927, 170, 82, 641, 808, 216, 86, 588, 326, 230, 644, 420, 362, 983, 493, 477, 253, 805, 186, 425, 768, 735, 510, 633, 541, 222, 593, 299, 839, 798, 134, 950, 313],
@@ -90,6 +105,9 @@ graph = [
     [42, 313, 634, 454, 454, 436, 814, 431, 558, 113, 540, 788, 808, 803, 369, 291, 762, 604, 197, 703, 781, 154, 917, 275, 26, 82, 575, 151, 39, 892, 715, 590, 770, 328, 386, 286, 931, 416, 880, 791, 729, 662, 232, 856, 75, 791, 327, 512, 545, 0],
 ]
 
+
+
+
 # represents a start state (one of the solution) of travelling salesman problem
 start_node = [i+1 for i in range(len(graph))] 
 
@@ -122,7 +140,23 @@ def state_generator():
 # solution=iter_hillclimb.iteratedHillClimbing(movegen,heuristic,state_generator,50)
 
 # solution=tabusearch.tabuSearch(start_node,movegen,heuristic,50)
-solution=beamsearch.beamSearch(start_node,movegen,heuristic,5,200)
+# solution=beamsearch.beamSearch(start_node,movegen,heuristic,5,200)
+
+
+
+#stochastic Local Search
+# solution=randomwalk.random_walk(start_node,movegen,heuristic,10000)
+# solution=simulatedannealing.simulated_annealing(start_node,movegen,heuristic,1000,100,0.995)
+# solution=stochastichillclimbing.stochastic_hill_climbing(start_node,movegen,heuristic,1000,0.4)
+
+
+#Genetic Algorithm
+solution=ga_tsp.genetic_algorithm(start_node, population=10, heuristic=heuristic, generations=1000, mutation_rate=0.2, k=2)
+
+
+#ACO
+
+# solution=aco.aco(distance_matrix=graph, num_ants=20, max_iterations=1000, alpha=2.0, beta=2.0, evaporation_rate=0.3, initial_pheromone=1.0)
 
 
 

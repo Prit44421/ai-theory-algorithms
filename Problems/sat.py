@@ -19,6 +19,9 @@ import blindSearch.planning.dfid as dfid_planning
 import heuristic.bfs as bestfs
 
 
+#Genetic Algorithm
+import Genetic.sat as ga_sat
+
 
 start_node=[0,0,0,0,0] # represents (x1,x2,x3,x4,x5) all False
 
@@ -47,7 +50,7 @@ def goal_test(node):
     return test
 
 def heuristic(node):
-    # number of clauses satisfied
+    # number of clauses not satisfied
     score = 0
     if (node[0] or not node[1]):
         score += 1
@@ -86,10 +89,14 @@ def heuristic(node):
 
 
 #Heuristic Search
-solution=bestfs.bestfirstsearch(start_node,movegen,goal_test,heuristic)
+# solution=bestfs.bestfirstsearch(start_node,movegen,goal_test,heuristic)
 
 
-print(f"\nSolution Path Length: {len(solution)}\n")
+# Genetic Algorithm
+solution=ga_sat.genetic_algorithm(start_node, population=5, heuristic=heuristic, generations=1000, mutation_rate=0.1, k=2)
 
 
-print(solution)
+# print(f"\nSolution Path Length: {len(solution)}\n")
+
+
+print(f"Solution: {solution}")

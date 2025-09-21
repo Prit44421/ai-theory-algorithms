@@ -17,6 +17,13 @@ import blindSearch.planning.dfid as dfid_planning
 # heuristic search
 import heuristic.bfs as bestfs
 import localSearch.hillClimbing as hillclimbing
+
+#stochastic search
+import Stochastic.randomWalk as randomwalk
+import Stochastic.simulatedAnnealing as simulatedannealing
+import Stochastic.hillClimbing as stochastichillclimbing
+
+
 # represents the starting 8 puzzle board configuration
     # [8, 6, 7]
     # [2, 5, 4]
@@ -92,7 +99,7 @@ def heuristic_manhattan(node):
 # Planning problem
 
 # solution=dfs_planning.dfs_closed(start_node,movegen,goal_test)
-solution=bfs_planning.bfs_closed(start_node,movegen,goal_test)
+# solution=bfs_planning.bfs_closed(start_node,movegen,goal_test)
 
 # solution=dfid_planning.dfid(start_node,movegen,goal_test)
 
@@ -107,11 +114,22 @@ solution=bfs_planning.bfs_closed(start_node,movegen,goal_test)
 # print(f"Final Node with hill climbing heuristic {heuristic_manhattan(solution)}: {solution}")
 
 
-if not solution:
-    print("No solution found")
-else:
-    print(f"\nSolution Path Length: {len(solution)}\n")
+#Stochastic Search
+# solution=randomwalk.random_walk(start_node,movegen,goal_test,max_steps=10000)
+solution=simulatedannealing.simulated_annealing(start_node,movegen,heuristic_manhattan,max_steps=10000,initial_temp=1.0,cooling_rate=0.95)
+# solution=stochastichillclimbing.stochastic_hill_climbing(start_node,movegen,heuristic_manhattan,max_steps=10000,temperature=0.5)
 
-    for i in range(len(solution)):
-        step = solution[i]
-        print(f"Step: {i+1}\n{step[0:3]}\n{step[3:6]}\n{step[6:9]}\n")
+print("\n")
+print("Final Node:")
+print(f"{solution[0:3]}\n{solution[3:6]}\n{solution[6:9]}")
+
+
+
+# if not solution:
+#     print("No solution found")
+# else:
+#     print(f"\nSolution Path Length: {len(solution)}\n")
+
+#     for i in range(len(solution)):
+#         step = solution[i]
+#         print(f"Step: {i+1}\n{step[0:3]}\n{step[3:6]}\n{step[6:9]}\n")
