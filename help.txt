@@ -1,0 +1,289 @@
+HEURISTIC & SIMPLE (UNINFORMED) SEARCH – QUICK TEST CHEAT SHEET
+===============================================================
+Keep this as a rapid recall sheet. Focus: problem formulation, algorithm properties (Completeness, Optimality, Time, Space), heuristic quality, and typical pitfalls.
+
+1. PROBLEM FORMULATION
+----------------------
+A search problem is defined by:
+- Initial state
+- Actions (successor function)
+- Transition model (result function)
+- Goal test (can be single or set of states)
+- Path cost function g(n) (sum of step costs)
+Solution: sequence of actions from initial to goal. Optimal solution: minimal path cost.
+State space = set of all reachable states. Search tree ≠ state space (may contain repeated states via different paths).
+
+2. NODE DATA STRUCTURE (typical fields)
+--------------------------------------
+state, parent, action, path_cost g(n), depth, (and for heuristic search: h(n), f(n)).
+
+3. UNINFORMED (BLIND / SIMPLE) SEARCH METHODS
+---------------------------------------------
+All ignore goal distance estimates.
+Metrics Notation: b = branching factor, d = depth of shallowest goal, m = maximum depth (may be ∞).
+
+3.1 Breadth-First Search (BFS)
+- Frontier: FIFO queue.
+- Expands shallowest nodes first.
+- Complete? Yes (if b finite & step cost ≥ ε > 0).
+- Optimal? Yes for uniform step costs (else use Uniform-Cost).
+- Time: O(b^{d+1}). Space: O(b^{d+1}) (memory heavy).
+- Good when optimal path length (few steps) is small.
+
+3.2 Depth-First Search (DFS)
+- Frontier: LIFO stack (recursive or explicit stack).
+- Expands deepest node first.
+- Complete? No (can get stuck in infinite branch). Complete in finite acyclic spaces if cycle checking + depth bound.
+- Optimal? No.
+- Time: O(b^m). Space: O(b*m) (linear) -> memory efficient.
+- Risk: explores deep irrelevant paths.
+
+3.3 Depth-Limited Search (DLS)
+- DFS with depth cutoff L.
+- Complete? Only if L ≥ d (unknown d => risk). Returns cutoff failure otherwise.
+- Use as component of Iterative Deepening.
+
+3.4 Iterative Deepening Depth-First (IDDFS / DFID)
+- Repeated DLS with L = 0..d.
+- Complete? Yes (finite branching) like BFS.
+- Optimal? Yes for uniform step costs.
+- Time: O(b^d) (overhead small ~ b^d / (b-1)).
+- Space: O(b*d).
+- Preferred when depth unknown & memory limited.
+
+3.5 Uniform-Cost Search (UCS / Dijkstra variant for goals)
+- Frontier: priority queue ordered by path cost g(n).
+- Expands node with smallest g.
+- Complete? Yes if costs ≥ ε > 0.
+- Optimal? Yes (first goal popped is optimal).
+- Time: O(b^{(C*/ε)}) where C* = optimal cost. Space: same order (stores frontier).
+
+3.6 Bidirectional Search
+- Forward from start & backward from goal using BFS (needs invertible actions / explicit goal set).
+- Ideally reduces time to O(b^{d/2}).
+- Space: still exponential; two frontiers must be stored. Intersection detection crucial (hash sets).
+
+3.7 Repeated-State / Cycle Handling
+- Without pruning: huge blowup. Maintain explored set (closed list) for graph search variants (except pure tree search). For DFS memory advantages may reduce if storing explored states.
+
+4. HEURISTICS BASICS
+--------------------
+Heuristic h(n): estimated cost from node n to nearest goal. Domain-specific, cheap to compute.
+- Admissible: never overestimates true cost h*(n). (h(n) ≤ h*(n)). Ensures A* optimality (tree search).
+- Consistent (Monotonic): h(n) ≤ c(n,a,n') + h(n'). Implies f(n)=g+h non-decreasing along path; needed for graph A* optimality with simple closed set.
+- Dominance: h1 dominates h2 if ∀n h1(n) ≥ h2(n) and both admissible. Higher dominates means fewer node expansions.
+- Combining admissible heuristics: h(n) = max(h1(n), h2(n)) is admissible and dominates each.
+- Accuracy tradeoff: expensive heuristic computation vs fewer expansions.
+
+5. INFORMED / HEURISTIC SEARCH ALGORITHMS
+-----------------------------------------
+5.1 Greedy Best-First Search
+- Priority by h(n) only (least estimated distance to goal).
+- Complete? No (can loop unless visited set). Can get stuck on heuristic plateaus.
+- Optimal? No.
+- Time/Space: O(b^m) worst; often fast in practice.
+- Pros: Quick solutions. Cons: Not guaranteed good quality.
+
+5.2 A* Search
+- Priority by f(n) = g(n) + h(n).
+- With admissible & consistent h: Complete & Optimal.
+- If only admissible (not consistent): still optimal with special handling (re-open nodes when better g found).
+- Time: Exponential in worst case; performance improves with heuristic accuracy (effective branching factor b* < b).
+- Space: Stores frontier (OPEN) + explored (CLOSED): can be large (memory bottleneck).
+- Optimization: Use binary heap or pairing heap; tie-breaking: prefer higher g (deeper) can reduce expansions on plateaus.
+
+5.3 Iterative Deepening A* (IDA*)
+- Repeated depth-first on f-cost threshold that increases (next threshold = min f that exceeded previous).
+- Space: O(b*d).
+- Time: More re-expansions than A*, but avoids memory blow-up.
+
+5.4 Weighted A* (WA*)
+- f_w(n) = g(n) + w*h(n), w>1.
+- Not admissible (may sacrifice optimality). Provides speed-quality tradeoff. If w→∞ approximates Greedy.
+
+5.5 Memory-Bounded Variants
+- RBFS (Recursive Best-First): Keeps limited memory; uses backed-up f-values.
+- SMA* (Simplified Memory-Bounded A*): Discards worst leaf when memory full, stores backed-up f to allow regeneration.
+
+5.6 Local Search / Optimization (State-space landscapes)
+Often treat states as complete configurations (no paths): aim to improve objective.
+- Hill Climbing: Move to neighbor with best improvement. Issues: local maxima, plateaus, ridges. Variants: stochastic, first-choice, random-restart.
+- Simulated Annealing: Probabilistic acceptance of worse moves early (temperature T decreases). Escapes local maxima.
+- Local Beam Search: Keep k best states each iteration; variants: stochastic beam (probabilistic selection).
+- Tabu Search: Maintains tabu list forbidding recent states/moves to prevent cycling; may allow non-improving moves.
+- Genetic Algorithms: Population, selection, crossover, mutation, fitness function.
+- Gradient Descent (if differentiable representation) similar conceptually to hill climbing.
+
+5.7 Beam Search vs BFS
+- Beam width k restricts frontier size to best k nodes by heuristic (NOT optimal, incomplete for small k). Reduces memory.
+
+6. HEURISTIC DESIGN EXAMPLES
+----------------------------
+8-Puzzle:
+- h1: Misplaced tiles (admissible, easy).
+- h2: Manhattan distance (sum of |dx|+|dy| for each tile). Dominates h1.
+- h3: Linear conflict = Manhattan + 2*conflicts (still admissible).
+
+n-Queens:
+- Heuristic (for local search): number of pairs of queens attacking each other; goal is 0.
+
+Route Planning:
+- h: Straight-line (Euclidean) distance to goal (admissible if actual cost is road distance ≥ straight-line).
+
+SAT (heuristic local search):
+- Min-conflicts heuristics: choose variable causing most conflicts to flip (for CSP-style framing).
+
+7. EVALUATING HEURISTIC QUALITY
+-------------------------------
+Effective Branching Factor (b*): Suppose A* expanded N nodes to reach depth d: N+1 = 1 + b* + (b*)^2 + ... + (b*)^d. Solve for b* numerically; lower b* means better heuristic.
+
+8. SEARCH STRATEGY COMPARISON (SUMMARY)
+---------------------------------------
+Algorithm | Complete | Optimal | Time (worst)     | Space
+BFS       | Yes      | Yes (unit) | O(b^{d+1})     | O(b^{d+1})
+DFS       | No       | No         | O(b^m)         | O(b*m)
+IDDFS     | Yes      | Yes (unit) | O(b^d)         | O(b*d)
+UCS       | Yes      | Yes        | O(b^{1+⌊C*/ε⌋})| O(b^{1+⌊C*/ε⌋})
+Greedy    | No       | No         | O(b^m)         | O(b^m)
+A* (cons) | Yes      | Yes        | Exponential    | Exponential
+IDA*      | Yes      | Yes        | More than A*   | O(b*d)
+RBFS      | Yes      | Yes        | Similar A*     | O(b*d)
+Hill Climb| No       | No (local) | Varies         | O(1)
+Sim Anneal| Prob Yes | No (approx)| Varies         | O(1)
+Tabu      | Prob Yes | No (approx)| Varies         | O(1)
+Beam (k)  | No       | No         | O(k * d * b')  | O(k)
+(Notes: 'cons' = consistent heuristic; b' ≈ average branching after pruning.)
+
+9. COMMON PITFALLS & NOTES
+--------------------------
+- Forgetting to detect repeated states => exponential blow-up.
+- Using non-admissible heuristic when optimality required.
+- Assuming admissible ⇒ consistent (false). Consistency stronger.
+- Not updating / reopening nodes in A* when heuristic inconsistent.
+- Deep recursion limit in DFS/IDA* in Python (sys.setrecursionlimit if needed, but iterative forms safer).
+- Priority queue tie-breaking can influence performance (prefer larger g for A* often reduces expansions on plateaus).
+
+10. PSEUDOCODE SNIPPETS
+-----------------------
+Generic Tree Search:
+function TREE-SEARCH(problem):
+  frontier <- { make-node(problem.initial) }
+  loop:
+    if frontier empty: return failure
+    node <- frontier.pop()   ; (according to strategy)
+    if problem.GOAL-TEST(node.state): return SOLUTION(node)
+    frontier <- frontier ∪ EXPAND(node)
+
+Graph Search (with explored set):
+explored <- {}
+while frontier not empty:
+  node <- frontier.pop()
+  if GOAL-TEST(node.state): return SOLUTION(node)
+  explored.add(node.state)
+  for each child in EXPAND(node):
+     if child.state not in explored or frontier:
+        frontier.add(child)
+
+A* Key Condition: Use priority f(n)=g(n)+h(n); if using CLOSED set and consistent h, ignore revisits; else if better g found for some frontier/closed node, update & propagate (reopen).
+
+11. HEURISTIC CHECKS
+--------------------
+To prove admissible: show h(goal)=0 and for every node n, h(n) ≤ true minimal remaining cost (often via relaxation: remove constraints to compute easier exact cost; that cost ≤ original true cost ⇒ admissible heuristic).
+Consistency proof pattern: Show triangle inequality style with relaxed path decomposition.
+
+12. LOCAL VS GLOBAL SEARCH
+--------------------------
+- Tree/graph search: builds paths, needs memory for frontier.
+- Local search: operates on complete states, memory small, good for very large spaces, but no optimality guarantee, may need random restarts.
+
+13. IMPROVING HEURISTICS
+------------------------
+- Pattern databases: precompute exact costs for subproblems (store in table; use additive pattern sets if disjoint).
+- Abstraction heuristics: abstract state space cluster states -> compute distances in abstract space.
+- Combining: max of admissible heuristics; weighted sum may lose admissibility unless all scaled within bounds.
+
+14. TABU SEARCH KEY POINTS
+--------------------------
+- Maintain tabu list of (moves or states) of fixed length.
+- Aspiration criteria: allow tabu move if it yields best-so-far solution improvement.
+
+15. TERMINOLOGY FLASH
+---------------------
+- Frontier / OPEN: boundary of explored region.
+- CLOSED / explored set: visited states already expanded.
+- Branching factor b: average # of successors per node.
+- Plateau: flat heuristic region (all neighbors equal h).
+- Ridge: sequence where local search must go temporarily sideways.
+- Local minimum: neighbor states all worse.
+- Heuristic plateau strategies: sideways moves (limit count), random restart.
+
+16. QUICK FORMULAS
+------------------
+- A* Optimality (tree): h admissible.
+- A* Optimality (graph): h consistent OR manage re-openings.
+- Effective branching factor solve: N+1 = (b*^{d+1} - 1)/(b* - 1).
+
+17. WHEN TO USE WHAT
+--------------------
+- Small depth, need shortest path, uniform costs: BFS.
+- Large depth, unknown depth, memory bound: IDDFS.
+- Variable costs, need optimal: UCS (if no good heuristic) else A*.
+- Fast approximate answer: Greedy / Weighted A* / Beam.
+- Huge state space, solution existence more important than path: Local Search (hill climbing, simulated annealing, tabu).
+- Memory critical but want admissible: IDA*, RBFS, SMA*.
+
+18. QUICK CHECK TABLE (HEURISTIC PROPERTIES)
+-------------------------------------------
+Property        | Admissible | Consistent
+h=0             | Yes        | Yes
+Manhattan (grid)| Usually Yes| Yes (unit moves)
+Misplaced tiles | Yes        | Yes
+Weighted h (w>1)| No         | May violate both
+Dominating h    | If each adm| If each cons
+max(h1,h2)      | Yes if both| Yes if both
+sum(h1,h2)      | Only if disjoint additive pattern DBs
+
+19. EXAMPLE: DETECTING INCONSISTENCY
+------------------------------------
+If h(n) > c(n,a,n') + h(n') for some edge -> inconsistent; A* may need to reopen n'.
+
+20. SPEED TIPS IN IMPLEMENTATION
+--------------------------------
+- Use heapq for priority queue (Python). Store (f, tie, node).
+- Store g values in dict keyed by state for quick comparison.
+- Hashable state representations (tuple for board, frozenset for sets).
+- For large puzzles, prune symmetrical states early.
+
+21. COMMON EXAM QUESTIONS (MENTAL PROMPTS)
+-----------------------------------------
+- Prove heuristic admissibility / consistency.
+- Compare BFS vs IDDFS vs UCS vs A* for given scenario.
+- Given expansions counts, compute effective branching factor.
+- Provide example of admissible but inconsistent heuristic.
+- Describe modifications to A* when heuristic inconsistent.
+- Explain why IDDFS overhead is small.
+- Distinguish tree vs graph search consequences.
+
+22. MINI EXAMPLES
+-----------------
+Admissible but inconsistent example:
+Graph: A --1--> B --1--> Goal; A --2--> Goal.
+Heuristic: h(Goal)=0, h(B)=1, h(A)=2. (Admissible: h(A)=2 equals true cost via direct edge; but h(A)=2 > 1 + h(B)=1+1=2? Actually equals -> need different: set h(B)=0, then h(A)=2 > 1+0 so inconsistent but still ≤ true cost 2.)
+
+23. DEBUGGING HEURISTIC SEARCH
+------------------------------
+Symptoms: Many re-expansions => heuristic inconsistent OR poor closed handling.
+Memory blow-up => consider IDA*/RBFS.
+Slow expansions => improve heuristic (pattern DB, add linear conflicts).
+
+24. QUICK A* EDGE CONDITIONS
+----------------------------
+If h(n)=0 for all n -> A* reduces to UCS.
+If heuristic perfect (h=h*) -> A* expands only optimal path nodes.
+If heuristic overestimates occasionally -> may miss optimal path (not safe).
+
+25. ABBREVIATIONS
+-----------------
+BFS, DFS, DLS, IDDFS/DFID, UCS, GBFS (Greedy Best-First), A*, IDA*, RBFS, SMA*, HC (Hill Climb), SA (Simulated Annealing).
+
+END OF CHEAT SHEET

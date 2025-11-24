@@ -120,6 +120,7 @@ def state_gen(start_state,n):
         random.shuffle(state)
         states.append(state)
     return states
+
 def fitness_func(state, heuristic):
     return 100_000_000-heuristic(state)
 

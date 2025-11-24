@@ -51,6 +51,16 @@ graph = [
 
 '''
 
+graph = [
+    [0, 12, 10, 19, 8, 14, 15],
+    [12, 0, 3, 7, 11, 8, 9],
+    [10, 3, 0, 6, 9, 7, 12],
+    [19, 7, 6, 0, 5, 10, 8],
+    [8, 11, 9, 5, 0, 6, 7],
+    [14, 8, 7, 10, 6, 0, 4],
+    [15, 9, 12, 8, 7, 4, 0]
+]
+'''
 # best found 2639
 graph = [
     [0, 110, 221, 950, 385, 40, 257, 951, 19, 958, 705, 343, 195, 659, 843, 702, 449, 757, 98, 509, 754, 670, 753, 309, 164, 752, 732, 751, 338, 976, 221, 654, 929, 444, 734, 699, 84, 441, 240, 696, 378, 151, 607, 722, 424, 574, 876, 276, 846, 42],
@@ -104,7 +114,7 @@ graph = [
     [846, 950, 515, 759, 668, 529, 44, 454, 240, 596, 877, 747, 715, 617, 920, 966, 652, 498, 406, 382, 591, 585, 411, 694, 774, 870, 152, 986, 1000, 766, 836, 494, 142, 968, 99, 103, 807, 298, 500, 14, 936, 771, 97, 975, 434, 655, 308, 356, 0, 545],
     [42, 313, 634, 454, 454, 436, 814, 431, 558, 113, 540, 788, 808, 803, 369, 291, 762, 604, 197, 703, 781, 154, 917, 275, 26, 82, 575, 151, 39, 892, 715, 590, 770, 328, 386, 286, 931, 416, 880, 791, 729, 662, 232, 856, 75, 791, 327, 512, 545, 0],
 ]
-
+'''
 
 
 
@@ -118,6 +128,8 @@ def movegen(node):
             new_node=node[:i]+node[i:j+1][::-1]+node[j+1:]
             childerens.append(new_node)
     return childerens
+
+
 
 def heuristic(node):
     cost=0
@@ -134,8 +146,20 @@ def state_generator():
     return node
 
 
+def movegen2(node):
+    print(node)
+    childerens=[]
+    for i in range(1,len(node)-2):
+        for j in range(i+1,len(node)-1):
+            new_node=node[:]
+            new_node[i],new_node[j]=new_node[j],new_node[i]
+            childerens.append(new_node)
+
+    print(f"{x} : {heuristic(x)}" for x in childerens)
+    return childerens
+
 #Heuristic Search -Local Search
-# solution=hillclimbing.hillClimbing(start_node,movegen,heuristic)
+solution=hillclimbing.hillClimbing(start_node,movegen2,heuristic)
 
 # solution=iter_hillclimb.iteratedHillClimbing(movegen,heuristic,state_generator,50)
 
@@ -151,7 +175,7 @@ def state_generator():
 
 
 #Genetic Algorithm
-solution=ga_tsp.genetic_algorithm(start_node, population=10, heuristic=heuristic, generations=1000, mutation_rate=0.2, k=2)
+# solution=ga_tsp.genetic_algorithm(start_node, population=10, heuristic=heuristic, generations=1000, mutation_rate=0.2, k=2)
 
 
 #ACO
